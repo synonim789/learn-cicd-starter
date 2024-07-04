@@ -28,6 +28,14 @@ func TestGetAPIKey(t *testing.T) {
 			expectedErr: errors.New("malformed authorization header"),
 		},
 		{
+			name: "Malformed Authorization header with no key",
+			headers: http.Header{
+				"Authorization": []string{"ApiKey"},
+			},
+			expectedKey: "",
+			expectedErr: errors.New("malformed authorization header"),
+		},
+		{
 			name: "Valid Authorization header",
 			headers: http.Header{
 				"Authorization": []string{"ApiKey someapikey"},
@@ -43,7 +51,7 @@ func TestGetAPIKey(t *testing.T) {
 			if key != tt.expectedKey {
 				t.Errorf("expected key %v, got %v", tt.expectedKey, key)
 			}
-			if !errors.Is(err, tt.expectedErr) {
+			if (err != nil && tt.expectedErr == nil) || (err == nil && tt.expectedErr != nil) || (err != nil && tt.expectedErr != nil && err.Error() != tt.expectedErr.Error()) {
 				t.Errorf("expected error %v, got %v", tt.expectedErr, err)
 			}
 		})
